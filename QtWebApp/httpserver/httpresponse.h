@@ -90,6 +90,18 @@ public:
     void write(const QByteArray data, const bool lastPart=false);
 
     /**
+      Write whole body data to the socket with a single writeToSocket() call, then flush socket buffer.
+      <p>
+      The HTTP status line, headers and cookies are sent before the body.
+      <p>
+      This method is faster than write().
+      <p>
+      Chunked mode is not supported!
+      @param data Data bytes of the body
+    */
+    void writeSingle(const QByteArray &data);
+
+    /**
       Indicates whether the body has been sent completely (write() has been called with lastPart=true).
     */
     bool hasSentLastPart() const;
@@ -155,6 +167,11 @@ private:
       it automatically when required.
     */
     void writeHeaders();
+
+    /**
+      Return a byte array containing the response HTTP status and headers.
+     */
+    QByteArray genHeaders() const;
 
 };
 

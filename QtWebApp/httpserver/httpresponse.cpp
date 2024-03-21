@@ -48,29 +48,38 @@ int HttpResponse::getStatusCode() const
 void HttpResponse::writeHeaders()
 {
     Q_ASSERT(sentHeaders==false);
+    QByteArray buffer=genHeaders();
+    writeToSocket(buffer);
+    socket->flush();
+    sentHeaders=true;
+}
+
+QByteArray HttpResponse::genHeaders() const
+{
+    Q_ASSERT(sentHeaders==false);
     QByteArray buffer;
     buffer.append("HTTP/1.1 ");
     buffer.append(QByteArray::number(statusCode));
     buffer.append(' ');
     buffer.append(statusText);
     buffer.append("\r\n");
-    foreach(QByteArray name, headers.keys())
-    {
-        buffer.append(name);
+    QMap<QByteArray,QByteArray>::const_iterator itHeaders = headers.constBegin();
+    while (itHeaders != headers.constEnd()) {
+        buffer.append(itHeaders.key());
         buffer.append(": ");
-        buffer.append(headers.value(name));
+        buffer.append(itHeaders.value());
         buffer.append("\r\n");
+        ++itHeaders;
     }
-    foreach(HttpCookie cookie,cookies.values())
-    {
+    QMap<QByteArray,HttpCookie>::const_iterator itCookies = cookies.constBegin();
+    while (itCookies != cookies.constEnd()) {
         buffer.append("Set-Cookie: ");
-        buffer.append(cookie.toByteArray());
+        buffer.append(itCookies.value().toByteArray());
         buffer.append("\r\n");
+        ++itCookies;
     }
     buffer.append("\r\n");
-    writeToSocket(buffer);
-    socket->flush();
-    sentHeaders=true;
+    return buffer;
 }
 
 bool HttpResponse::writeToSocket(QByteArray data)
@@ -159,6 +168,17 @@ void HttpResponse::write(QByteArray data, bool lastPart)
     }
 }
 
+void HttpResponse::writeSingle(const QByteArray &data)
+{
+    Q_ASSERT(chunkedMode==false);
+    Q_ASSERT(sentHeaders==false);
+    headers.insert("Content-Length",QByteArray::number(data.size()));
+    QByteArray buffer=genHeaders();
+    buffer.append(data);
+    writeToSocket(buffer);
+    socket->flush();
+    sentLastPart=true;
+}
 
 bool HttpResponse::hasSentLastPart() const
 {

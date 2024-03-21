@@ -1,3 +1,18 @@
+This fork adds a `HttpResponse::writeSingle` method, which can write both HTTP header and body to the socket with a single `HttpResponse::writeToSocket` call. It could be much faster than `HttpResponse::write` method under certain conditions, especially when your network is very fast or your client and server are running on a same machine ( in that case, using `HttpResponse::write` may cause HTTP header and body sent in multiple packets ).
+
+`SpeedTestServer` and `SpeedTestClient` demonstrate how to use `HttpResponse::writeSingle`.
+
+Example test results ( `SpeedTestServer` and `SpeedTestClient` running on a same Debian 10 machine with Qt 5.12.12 ):
+
+```
+Avg. time cost for /common = 46.760771 ms
+Avg. time cost for /fast = 0.200236 ms
+```
+
+The following are the orignial readme.
+
+---
+
 # QtWebApp HTTP Server in C++
 
 Fork from Stefan's QtWebApp: http://stefanfrings.de/qtwebapp/index-en.html

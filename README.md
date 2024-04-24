@@ -1,4 +1,4 @@
-This fork adds a `HttpResponse::writeSingle` method, which can write both HTTP header and body to the socket with a single `HttpResponse::writeToSocket` call. It could be much faster than `HttpResponse::write` method under certain conditions, especially when your network is very fast or your client and server are running on a same machine ( in that case, using `HttpResponse::write` may cause HTTP header and body sent in multiple packets ).
+﻿This fork adds a `HttpResponse::writeSingle` method, which can write both HTTP header and body to the socket with a single `HttpResponse::writeToSocket` call. It could be much faster than `HttpResponse::write` method under certain conditions, especially when your network is very fast or your client and server are running on a same machine ( in that case, using `HttpResponse::write` may cause HTTP header and body sent in multiple packets ).
 
 `SpeedTestServer` and `SpeedTestClient` demonstrate how to use `HttpResponse::writeSingle`.
 
@@ -8,6 +8,16 @@ Example test results ( `SpeedTestServer` and `SpeedTestClient` running on a same
 Avg. time cost for /common = 46.760771 ms
 Avg. time cost for /fast = 0.200236 ms
 ```
+
+[2024.04.24 Update]
+
+Adds ECC key support. Add the following setting to the configuration file:
+```
+sslCertMethod=EC
+```
+Setting `sslCertMethod` to `RSA` or not setting `sslCertMethod` to use RSA key.
+
+Setting `sslCertMethod` to `DSA` may also work (Not tested).
 
 The following are the orignial readme.
 

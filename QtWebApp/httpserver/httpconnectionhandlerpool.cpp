@@ -1,4 +1,4 @@
-#ifndef QT_NO_SSL
+﻿#ifndef QT_NO_SSL
     #include <QSslSocket>
     #include <QSslKey>
     #include <QSslCertificate>
@@ -94,6 +94,7 @@ void HttpConnectionHandlerPool::loadSslConfig()
     QString sslCertFileName=settings->value("sslCertFile","").toString();
     QString caCertFileName=settings->value("caCertFile","").toString();
     bool verifyPeer=settings->value("verifyPeer","false").toBool();
+    QString sslCertMethodName=settings->value("sslCertMethod","RSA").toString();
 
     if (!sslKeyFileName.isEmpty() && !sslCertFileName.isEmpty())
     {
@@ -137,7 +138,14 @@ void HttpConnectionHandlerPool::loadSslConfig()
                 qCritical("HttpConnectionHandlerPool: cannot open sslKeyFile %s", qPrintable(sslKeyFileName));
                 return;
             }
-            QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+            QSslKey sslKey;
+            if(sslCertMethodName.compare("DSA",Qt::CaseInsensitive)==0){
+                sslKey=QSslKey(&keyFile, QSsl::Dsa, QSsl::Pem);
+            }else if(sslCertMethodName.compare("EC",Qt::CaseInsensitive)==0){
+                sslKey=QSslKey(&keyFile, QSsl::Ec, QSsl::Pem);
+            }else{
+                sslKey=QSslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+            }
             keyFile.close();
 
             // Create the SSL configuration
